@@ -18,23 +18,15 @@
         }
         .gallery {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Adjusted for more images per row */
             gap: 1rem;
             padding: 1rem;
         }
-        .category {
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: white;
-            padding: 1rem;
-        }
-        .category h2 {
-            margin-top: 0;
-        }
-        .category-images {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 0.5rem;
+        .gallery img { /* Apply image styling directly to gallery images */
+            width: 100%;
+            height: auto;
+            cursor: pointer;
+            border-radius: 3px;
         }
         .category-images img {
             width: 100%;
@@ -287,40 +279,16 @@
         const modalImg = document.getElementById("img01");
         const span = document.getElementsByClassName("close")[0];
 
-        const imagesByCategory = imageFiles.reduce((acc, file) => {
-            const parts = file.split('/');
-            const category = parts.length > 1 ? parts[0] : 'General';
-            if (!acc[category]) {
-                acc[category] = [];
+        // Display all images directly without categories
+        imageFiles.forEach(file => {
+            const img = document.createElement('img');
+            img.src = file;
+            img.onclick = function() {
+                modal.style.display = "block";
+                modalImg.src = this.src;
             }
-            acc[category].push(file);
-            return acc;
-        }, {});
-
-        for (const category in imagesByCategory) {
-            const categoryDiv = document.createElement('div');
-            categoryDiv.className = 'category';
-
-            const categoryTitle = document.createElement('h2');
-            categoryTitle.textContent = category;
-            categoryDiv.appendChild(categoryTitle);
-
-            const imagesDiv = document.createElement('div');
-            imagesDiv.className = 'category-images';
-
-            imagesByCategory[category].forEach(file => {
-                const img = document.createElement('img');
-                img.src = file;
-                img.onclick = function() {
-                    modal.style.display = "block";
-                    modalImg.src = this.src;
-                }
-                imagesDiv.appendChild(img);
-            });
-
-            categoryDiv.appendChild(imagesDiv);
-            gallery.appendChild(categoryDiv);
-        }
+            gallery.appendChild(img);
+        });
 
         span.onclick = function() {
             modal.style.display = "none";
