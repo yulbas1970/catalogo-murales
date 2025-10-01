@@ -9,7 +9,7 @@ def generate_catalog(base_path):
         response = requests.get(backend_api_url)
         response.raise_for_status()  # Raise an exception for HTTP errors
         image_files = response.json()
-        print(f"Fetched {len(image_files)} image URLs from backend.")
+        print(f"DEBUG: Fetched {len(image_files)} image URLs from backend: {image_files}")
     except requests.exceptions.RequestException as e:
         print(f"Error fetching image URLs from backend: {e}")
         print("Falling back to local file scan.")
@@ -31,16 +31,24 @@ def generate_catalog(base_path):
     # Generate the new JavaScript array string
     js_array_items = [f"'{f}'" for f in image_files]
     new_js_array = f"const imageFiles = [\n{',\\n'.join(js_array_items)}\n];"
+    print(f"DEBUG: Generated new_js_array:\n{new_js_array}")
 
     # Find the old imageFiles array and replace it
-    pattern = re.compile(r"const imageFiles = \[\n(?:.|\n)*?\];", re.MULTILINE)
-    updated_html_content = pattern.sub(new_js_array, html_content)
+    pattern = re.compile(r"const imageFiles = \[\s*[\s\S]*?\];", re.MULTILINE)
+    
+    # Check if a substitution actually happens
+    updated_html_content, num_substitutions = pattern.subn(new_js_array, html_content)
+    print(f"DEBUG: Number of substitutions made: {num_substitutions}")
 
-    # Write the updated HTML content back to the file
-    with open(html_file_path, 'w', encoding='utf-8') as f:
-        f.write(updated_html_content)
+    if num_substitutions > 0:
+        # Write the updated HTML content back to the file
+        with open(html_file_path, 'w', encoding='utf-8') as f:
+            f.write(updated_html_content)
+        print(f"Catalog updated successfully with {len(image_files)} images.")
+    else:
+        print("DEBUG: No changes detected in imageFiles array, catalogo.html not modified.")
+        print(f"Catalog is already up to date with {len(image_files)} images.")
 
-    print(f"Catalog updated successfully with {len(image_files)} images.")
 
 if __name__ == "__main__":
     # The script assumes it's run from the CATALOGO_MURALES directory
